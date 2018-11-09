@@ -58,6 +58,7 @@ export function getWithdraw (params) {
 
   const data = {
     emp_id: params.emp_id,
+    emp_name: params.emp_name,
     apply_money: params.apply_money,
     card_sn: params.card_sn,
     bank_name: params.bank_name

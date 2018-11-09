@@ -12,7 +12,7 @@
       </div>
       <div class="vcode border-b">
         <Input type="text" placeholder="验证码" v-model="vCode"/>
-        <div class="content">{{randomVCode}}</div>
+        <div class="content" @click="refresh">{{random}}</div>
       </div>
       <div class="tip">
         <span class="text" v-show="isTip">{{tip}}</span>
@@ -42,12 +42,21 @@ export default {
       isEye: false,
       disabled: true,
       tip: '',
-      isTip: true
+      isTip: true,
+      random: null
     }
   },
   computed: {
     eyeType () {
       return this.isEye === true ? 'ios-eye' : 'ios-eye-off'
+    }
+  },
+  created () {
+    this.random = this.randomVCode()
+  },
+  methods: {
+    refresh () {
+      this.random = this.randomVCode()
     },
     randomVCode () {
       let random = Math.floor(Math.random() * 10000)
@@ -55,9 +64,7 @@ export default {
         random = '0' + random
       }
       return random.toString()
-    }
-  },
-  methods: {
+    },
     toggleEye () {
       this.isEye = !this.isEye
     },
@@ -98,7 +105,7 @@ export default {
       return phoneReg.test(phoneNum)
     },
     _checkVCode () {
-      if (this.vCode === this.randomVCode) {
+      if (this.vCode === this.random) {
         return true
       } else {
         return false

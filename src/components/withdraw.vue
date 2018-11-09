@@ -19,7 +19,7 @@
         <div class="withdraw-amount">可提现金额:{{this.sum_money}}元</div>
         <div class="content">
           <label>¥</label>
-          <input type="number" v-model="withdrawAmount">
+          <input type="number" v-model="withdrawAmount" @input="oninput">
           <Button type="error" @click="allIn">全部提现</Button>
         </div>
         <div class="tip">
@@ -61,7 +61,8 @@ export default {
       consume_mes: '',
       isModal: false,
       withdrawTip: '',
-      iconName: ''
+      iconName: '',
+      SalePrice: ''
     }
   },
   created () {
@@ -78,6 +79,9 @@ export default {
     }, 200))
   },
   methods: {
+    oninput (e) {
+      this.withdrawAmount = (e.target.value.match(/^\d*(\.?\d{0,2})/g)[0]) || null
+    },
     goBack () {
       this.isModal = false
       this.$router.back()
@@ -88,6 +92,7 @@ export default {
     async submit () {
       let response = await getWithdraw({
         emp_id: this.emp_id,
+        emp_name: this.name,
         apply_money: this.withdrawAmount,
         card_sn: this.bankCard,
         bank_name: this.openingBank

@@ -130,18 +130,20 @@ export default {
         time: this.time
       })
       if (response.state === ERR_OK) {
-        this.hasMore = false
-        if (this.isFirst) {
-          this.bill_info = response.data
-          this.isFirst = false
-        } else {
-          this.bill_info = this.bill_info.concat(response.data)
-          if (response.data.length === 0) {
-            return
+        setTimeout(() => {
+          this.hasMore = false
+          if (this.isFirst) {
+            this.bill_info = response.data
+            this.isFirst = false
+          } else {
+            this.bill_info = this.bill_info.concat(response.data)
+            if (response.data.length === 0) {
+              return
+            }
           }
-        }
-        this.billLength = response.data.length - 1
-        this.time = response.data[this.billLength].create_time
+          this.billLength = response.data.length - 1
+          this.time = response.data[this.billLength].create_time
+        }, 1000)
       }
     },
     _initScroll () {
@@ -156,6 +158,7 @@ export default {
         this.scroll.on('scrollEnd', () => {
           if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
             this._getBill()
+            this.scroll && this.scroll.refresh()
           }
         })
       })
