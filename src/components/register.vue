@@ -3,7 +3,7 @@
     <div class="logo"></div>
     <form class="form">
       <div class="border-b">
-        <Input type="text" placeholder="账号" v-model="account" class="account"/>
+        <Input type="text" placeholder="账号" v-model="account" class="account" ref="account" maxlength="11"/>
       </div>
       <div class="password border-b">
         <Input type="password" placeholder="密码" v-model="password" v-show="!isEye"/>
@@ -71,8 +71,13 @@ export default {
     async submit () {
       let isPhone = this._checkPhone(this.account)
       let isVCode = this._checkVCode()
+      let isPsd = this._checkPsd()
       if (!isPhone) {
         this.tip = '手机号输入有误,请重新输入'
+        return
+      }
+      if (!isPsd) {
+        this.tip = '密码不能小于6位,请重新输入'
         return
       }
       if (!isVCode) {
@@ -106,6 +111,13 @@ export default {
     },
     _checkVCode () {
       if (this.vCode === this.random) {
+        return true
+      } else {
+        return false
+      }
+    },
+    _checkPsd () {
+      if (this.password.length >= 6) {
         return true
       } else {
         return false
