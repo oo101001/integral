@@ -92,6 +92,7 @@ export default {
   },
   created () {
     this.id = loadUserInfo().id
+    this.phone = loadUserInfo().mobile
     this._getCoinInfo()
     this._getBill()
     if (!this.$route.query.emp_id) {
@@ -112,7 +113,8 @@ export default {
         name: 'Withdraw',
         params: {
           emp_id: this.$route.query.emp_id || this.id,
-          sum_money: this.coin_info.sum_money
+          sum_money: this.coin_info.sum_money,
+          phone: this.$route.query.phone || this.phone
         }
       })
     },
@@ -141,6 +143,9 @@ export default {
             }
           }
           this.billLength = response.data.length - 1
+          if (this.billLength === 0) {
+            return
+          }
           this.time = response.data[this.billLength].create_time
         }, 1000)
       }
@@ -175,54 +180,69 @@ export default {
     top 0
     right 0
     bottom 0
+
     #myIntegral
       .carousel
         width 100%
         height 120px
+
         .demo-carousel
           img
             width 100%
             height 100%
+
     .withdrawals
       margin 20px 15px 20px
+
       .rules
         display flex
         justify-content space-between
+
         .text
           .title
             font-size 18px
             color #333
+
           .desc
             font-size 13px
             color #999
+
             .scale
               color #FE5460
+
         .rulesBtn
           margin-top 3px
           font-size 13px
           color #999
+
           i
             font-size 16px
             vertical-align text-bottom
+
       .integral-show
         display flex
         justify-content center
         margin-top 26px
+
         .text
           line-height 25px
           font-size 13px
           color #999
+
           span
             font-size 18px
             color #333
+
         .integral
           margin-right 58px
+
           .icon-integral
             width 34px
             height 34px
             margin 0 auto 3px
             bg-image('integral')
             background-size cover
+
         .ingot
           .icon-ingot
             width 34px
@@ -230,26 +250,32 @@ export default {
             margin 0 auto 3px
             bg-image('ingot')
             background-size cover
+
       .withdraw
         margin 27px 23px 0
+
         button
           height 40px
           font-size 18px
           color #fff
           background #FE5460
           border-color #FE5460
+
     .line
       width 100%
       height 10px
       background #f9f9f9
+
     .bill
       margin 0 15px
+
       .title
         height 50px
         border-bottom 1px solid #ccc
         line-height 50px
         color #232323
         font-size 18px
+
       .bill-detail
         .detail
           display flex
@@ -257,32 +283,40 @@ export default {
           align-items center
           height 55px
           border-bottom 1px solid #f4f4f4
+
           .desc
             flex 1
+
             .type
               display flex
               justify-content space-between
               width 105px
+
               .type-text
                 font-size 15px
                 color #333
+
               .state
                 display inline-flex
                 align-items flex-end
                 font-size 11px
                 color #707070
+
             .time
               display flex
               justify-content space-between
               width 105px
               font-size 11px
               color #999
+
           .amount
             font-size 18px
             color #333
+
     .loading
       width 100%
       text-align center
+
       .desc
         line-height 20px
         font-size 13px

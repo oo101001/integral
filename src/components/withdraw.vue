@@ -4,15 +4,30 @@
       <form class="form">
         <div class="content mt-10">
           <label>提款姓名:</label>
-          <input type="text" placeholder="请输入您的姓名" v-model="name">
+          <input type="text" placeholder="请输入收款人姓名" v-model="name">
         </div>
-        <div class="content mt-10">
+        <div class="content">
           <label>银行卡号:</label>
           <input type="number" placeholder="请输入银行卡卡号" v-model="bankCard">
         </div>
         <div class="content">
           <label>开户行:</label>
-          <input type="text" placeholder="列:建设银行滨江支行" v-model="openingBank">
+          <input type="text" placeholder="例:建设银行滨江支行" v-model="openingBank">
+        </div>
+        <div class="content">
+          <label>手机号:</label>
+          <div class="phone">{{phone}}</div>
+        </div>
+        <div class="content last tipHeight">
+          <label></label>
+          <p>温馨提示：目前只支持餐服长本人手机验证提现。如果以上号码不是餐服长本人的联系方式，请在工作日致电,0571-86293510进行修改审核!</p>
+        </div>
+        <div class="content last">
+          <label>验证码:</label>
+          <input type="number" placeholder="请输入验证码" v-model="vcode">
+          <div class="getVCode" @click.stop="sendVCode">
+            <input type="button" :value="countDown" :disabled="isClick">
+          </div>
         </div>
       </form>
       <div class="amount mt-10">
@@ -31,9 +46,10 @@
       </div>
       <div class="modal" v-show="isModal">
         <div class="content">
-          <div class="icon-success"></div>
+          <div class="icon-success" v-show="hasIcon"></div>
           <h1 class="text">{{withdrawTip}}</h1>
-          <div class="hideBtn" @click="goBack">确定</div>
+          <div class="hideBtn" @click="hideModal" v-show="!isGoBack">确定</div>
+          <div class="hideBtn" @click="goBack" v-show="isGoBack">确定</div>
         </div>
       </div>
     </div>
@@ -41,9 +57,11 @@
 </template>
 
 <script type="text/ecmascript-6">
-import {getWithdrawConsumption, getWithdraw} from 'http/api'
+import {getWithdrawConsumption, getWithdraw, sendVCode} from 'http/api'
 import {debounce} from 'common/js/util'
 import {ERR_OK} from 'http/config'
+
+const CODE_OK = 1
 
 export default {
   name: 'withdraw',
@@ -56,13 +74,21 @@ export default {
       disabled: true,
       sum_money: this.$route.params.sum_money,
       emp_id: this.$route.params.emp_id,
+      phone: this.$route.params.phone,
       consume: {},
       consume_state: null,
       consume_mes: '',
       isModal: false,
       withdrawTip: '',
       iconName: '',
-      SalePrice: ''
+      SalePrice: '',
+      cvodeTip: '发送验证码',
+      count: 60,
+      timer: '',
+      isClick: false,
+      hasIcon: false,
+      vcode: '',
+      isGoBack: false
     }
   },
   created () {
@@ -78,13 +104,41 @@ export default {
       this._getConsumeTip(newSearchText)
     }, 200))
   },
+  computed: {
+    countDown () {
+      return this.count !== 60 ? `${this.count}s` : `发送验证码`
+    }
+  },
   methods: {
+    async sendVCode () {
+      this.isClick = true
+      let response = await sendVCode({mobile: this.phone})
+      if (response.state === CODE_OK) {
+        this.timer = setInterval(() => {
+          if (this.count > 1) {
+            this.count--
+            this.isClick = true
+          } else {
+            this.count = 60
+            clearInterval(this.timer)
+            this.isClick = false
+          }
+        }, 1000)
+      } else {
+        this.isClick = false
+        this.withdrawTip = response.mess
+        this.isModal = true
+      }
+    },
     oninput (e) {
       this.withdrawAmount = (e.target.value.match(/^\d*(\.?\d{0,2})/g)[0]) || null
     },
     goBack () {
       this.isModal = false
       this.$router.back()
+    },
+    hideModal () {
+      this.isModal = false
     },
     allIn () {
       this.withdrawAmount = this.sum_money
@@ -95,11 +149,19 @@ export default {
         emp_name: this.name,
         apply_money: this.withdrawAmount,
         card_sn: this.bankCard,
-        bank_name: this.openingBank
+        bank_name: this.openingBank,
+        mobile: this.phone,
+        mobile_code: this.vcode
       })
-      if (response.state === 1) {
+      if (response.state === ERR_OK) {
+        this.withdrawTip = response.mess
+        this.hasIcon = true
+        this.isModal = true
+        this.isGoBack = true
+      } else {
         this.withdrawTip = response.mess
         this.isModal = true
+        this.isGoBack = false
       }
     },
     checkSubmit () {
@@ -155,23 +217,49 @@ export default {
         display flex
         align-items center
         height 40px
-        border-bottom 1px solid #ccc
         background #fff
         label
           width 80px
           margin-left 15px
           font-size 15px
           color #232323
-        input
+        input, p, .phone
           flex 1
+          height 100%
           font-size 15px
           color #232323
           border none
+          border-radius 0
+          border-bottom 1px solid #ccc
+          background #fff
+        .phone
+          line-height 40px
+        p
+          display flex
+          align-items center
+          color #999
+          font-size 9px
+          border-bottom none
         input:
         :-webkit-input-placeholder
           color #999
         input:focus
           outline none
+      .last
+        border-bottom 1px solid #ccc
+        input
+          border-bottom none
+        .getVCode
+          width 80px
+          text-align center
+          input[type=button]
+            font-size 15px
+            color #237AD2
+            border 0
+            border-radius 0
+            background #fff
+      .tipHeight
+        height 50px
     .amount
       padding 15px 20px 0
       background #fff
@@ -237,7 +325,6 @@ export default {
         left 50%
         transform translateX(-50%)
         width 262px
-        height 225px
         text-align center
         box-shadow 0px 3px 6px rgba(0, 0, 0, 0.2)
         border-radius 4px
@@ -253,11 +340,13 @@ export default {
           background-size cover
         .text
           margin-top 10px
+          padding: 28px 40px 0
           line-height 25px
           font-size 18px
           color #232323
         .hideBtn
           margin-top 47px
+          margin-bottom 30px
           line-height 20px
           font-size 14px
           color #FE5460

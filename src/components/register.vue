@@ -92,7 +92,7 @@ export default {
       if (response.state === 1) {
         this.isTip = false
         saveUserInfo(response.data)
-        this.$router.push(`/?emp_id=${response.data.id}`)
+        this.$router.push(`/?emp_id=${response.data.id}&phone=${response.data.mobile}`)
       } else {
         this.isTip = true
         this.tip = response.mess

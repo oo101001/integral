@@ -61,7 +61,21 @@ export function getWithdraw (params) {
     emp_name: params.emp_name,
     apply_money: params.apply_money,
     card_sn: params.card_sn,
-    bank_name: params.bank_name
+    bank_name: params.bank_name,
+    mobile: params.mobile,
+    mobile_code: params.mobile_code
+  }
+
+  return axios.post(url, data).then(res => {
+    return Promise.resolve(res.data)
+  })
+}
+
+export function sendVCode (params) {
+  const url = '/index.php/integral/mobile/sendCode'
+
+  const data = {
+    mobile: params.mobile
   }
 
   return axios.post(url, data).then(res => {
