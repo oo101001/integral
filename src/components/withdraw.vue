@@ -139,6 +139,7 @@ export default {
     },
     hideModal () {
       this.isModal = false
+      console.log(1)
     },
     allIn () {
       this.withdrawAmount = this.sum_money
